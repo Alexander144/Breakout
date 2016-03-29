@@ -3,13 +3,14 @@
 #include <vector>
 #include <memory>
 #include "SDL.h"
+#include "Game.h"
 using namespace std;
 int main()
 {
-	Breakout run;
+	Game run;
 	
-	run.init();
-	run.loadmedia();
+	run.Init();
+	run.load_BMP("1.png");
 	
 	
 	//run.close();

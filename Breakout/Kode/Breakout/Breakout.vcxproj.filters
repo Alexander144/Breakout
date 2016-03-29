@@ -21,6 +21,15 @@
     <ClInclude Include="Breakout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Ball.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayingField.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Breakout.cpp">
@@ -29,25 +38,28 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Ball.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayingField.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Picture\bricks.png">
+    <Image Include="Picture\paddleBounds.png">
       <Filter>Resource Files\Picture</Filter>
     </Image>
-    <Image Include="Picture\paddle.png">
-      <Filter>Resource Files\Picture</Filter>
+    <Image Include="1.png">
+      <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Picture\side.png">
-      <Filter>Resource Files\Picture</Filter>
-    </Image>
-    <Image Include="Picture\ball.png">
-      <Filter>Resource Files\Picture</Filter>
-    </Image>
-    <Image Include="C:\Users\Alexander\Desktop\e.bmp">
-      <Filter>Resource Files\Picture</Filter>
+    <Image Include="C:\Users\Alexander\Desktop\example.bmp">
+      <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #ifndef BREAKOUT_H
 #define BREKOUT_H
 #include "SDL.h"
+#include "SDL_image.h"
 #undef main
 
 class Breakout
@@ -18,6 +19,7 @@ public:
 	bool loadmedia();
 	void close();
 
+	void CheckBallHit();
 private:
 };
 #endif
