@@ -3,43 +3,40 @@
 
 #include "Ball.h"
 #include "PlayingField.h"
-#include <SDL.h>
-#include <SDL_image.h>
+
 #include <string>
-#include <SDL_>
+#include <iostream>
+
 class Game {
 public:
-	SDL_Window *window = nullptr;
-	SDL_Renderer *rendrer;
-	SDL_Surface *ScreenSurface = nullptr;
-	SDL_Surface *loadImage;
-	SDL_Surface *optimizeImage;
-	SDL_Texture *texture;
-	SDL_Event Event;
-	SDL_GLContext context;
+	Game();
+	~Game();
+	bool Init(const int height, const int width);
+	bool LoadMedia(std::string filename);
+	bool DisplayMedia();
+	bool Setup();
 
-	SDL_Surface *load_image(std::string filename);
-
-	SDL_Surface * load_BMP(std::string filename);
+	void MakeViewPort();
+	void DrawBox();
 	
-	bool ApplayingImage();
+	SDL_Surface* loadSurface(std::string path);
 
-	bool key_left = false;
-	bool key_right = false;
+	SDL_Texture * loadTexture(std::string path);
 
-	int SCREEN_WIDTH = 300;
-	int SCREEN_HEIGHT = 200;
+private:
+	SDL_Window *window = nullptr;
+	SDL_GLContext context = nullptr;
+	SDL_Renderer *render = nullptr;
+	SDL_Texture *texture = nullptr;
+	SDL_Surface *image = nullptr;
+	SDL_Surface *screen = nullptr;
+	//Screen attributes
+	int SCREEN_WIDTH;
+	int SCREEN_HEIGHT;
+	const int SCREEN_BPP = 32;
 
-	unsigned int lastTick;
-	unsigned int FPStick;
-	int fps;
-	int frameCount;
 
-	//Ball *ball;
-	//PlayingField *field;
-	//void Render(float delta);
-	bool Init();
 };
 
-#endif // !GAME_H
+#endif 
 

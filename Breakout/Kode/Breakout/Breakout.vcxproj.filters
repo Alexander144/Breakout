@@ -52,14 +52,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Picture\paddleBounds.png">
+    <Image Include="Picture\example.bmp">
       <Filter>Resource Files\Picture</Filter>
     </Image>
-    <Image Include="1.png">
-      <Filter>Resource Files</Filter>
+    <Image Include="Picture\Paddle.png">
+      <Filter>Resource Files\Picture</Filter>
     </Image>
-    <Image Include="C:\Users\Alexander\Desktop\example.bmp">
-      <Filter>Resource Files</Filter>
+    <Image Include="Picture\Texture.png">
+      <Filter>Resource Files\Picture</Filter>
     </Image>
   </ItemGroup>
 </Project>

@@ -1,10 +1,37 @@
 #include "Game.h"
+#include <GL/glew.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_opengles2.h>
+#include <stdio.h>
 
-bool Game::Init()
+Game::Game()
 {
+}
+
+Game::~Game()
+{
+	//Deallocate surface
+	SDL_FreeSurface(image);
+	image = nullptr;
+
+	//Destroy window
+	SDL_DestroyWindow(window);
+	window = nullptr;
+
+	//Quit SDL subsystems
+	SDL_Quit();
+}
+
+bool Game::Init(const int height, const int width)
+{
+	SCREEN_HEIGHT = height;
+	SCREEN_WIDTH = width;
+	//Initialization flag
 	bool success = true;
-
-
+	
+	
+	//Initialize SDL
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
 		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
@@ -12,92 +39,181 @@ bool Game::Init()
 	}
 	else
 	{
-		//lager et vindu
-		window = SDL_CreateWindow("Breakout",
-			SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED,
-			SCREEN_HEIGHT,
-			SCREEN_WIDTH,
-			SDL_WINDOW_OPENGL |
-			SDL_WINDOW_SHOWN);
-
-		if (window == nullptr)
+		//Create window
+		window = SDL_CreateWindow("Breakout", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
+		//Create rendrer for window
+		render = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+		
+		if (window == NULL)
 		{
-			printf("Window could not be created! SDL_ERROR: %s\n", SDL_GetError());
+			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 			success = false;
 		}
 		else
 		{
-			ScreenSurface = SDL_GetWindowSurface(window);
+			//Get window surface
+			screen = SDL_GetWindowSurface(window);
 		}
-
 	}
+
 	return success;
 }
 
-SDL_Surface * Game::load_image(std::string filename)
+bool Game::LoadMedia(std::string filename)
 {
-	loadImage = nullptr;
+	//Loading success flag
+	bool success = true;
 
-	optimizeImage = nullptr;
+	SDL_SetRenderDrawColor(render, 0xFF, 0xFF, 0xFF, 0xFF);
 
-	loadImage = IMG_Load(filename.c_str());
-
-	if (loadImage != nullptr) {
-
-		optimizeImage = SDL_ConvertSurface(loadImage, ScreenSurface->format, NULL);
-
-		SDL_FreeSurface(loadImage);
+	texture = loadTexture("Picture/Texture.png");
+	int imgFlags = IMG_INIT_PNG;
+	
+	if (!(IMG_Init(imgFlags) & imgFlags))
+	{
+		printf("Unable to load image %s! SDL Error: %s\n", filename.c_str(), SDL_GetError());
+		success = false;
 	}
 	else {
-		printf("Not Valid filePath");
+		image = loadSurface(filename.c_str());
 	}
 
-	return optimizeImage;
+	return success;
 }
-SDL_Surface * Game::load_BMP(std::string filename)
+
+SDL_Surface* Game::loadSurface(std::string path)
 {
-	loadImage = nullptr;
+	//The final optimized image
+	SDL_Surface* optimizedSurface = NULL;
 
-	optimizeImage = nullptr;
+	//Load image at specified path
+	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
+	if (loadedSurface == NULL)
+	{
+		printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
+	}
+	else
+	{
+		//Convert surface to screen format
+		optimizedSurface = SDL_ConvertSurface(loadedSurface, screen->format, NULL);
+		if (optimizedSurface == NULL)
+		{
+			printf("Unable to optimize image %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
+		}
 
-	loadImage = SDL_LoadBMP("example.bmp");
+		//Get rid of old loaded surface
+		SDL_FreeSurface(loadedSurface);
+	}
 
-	context = SDL_GL_CreateContext(window);
+	return optimizedSurface;
+}
 
-	if (loadImage != nullptr) {
+SDL_Texture* Game::loadTexture(std::string path)
+{
+	//The final texture
+	SDL_Texture* newTexture = NULL;
 
-		glEnable(GL_TEXTURE_2D);
-		GLuint texture;
+	//Load image at specified path
+	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
+	if (loadedSurface == NULL)
+	{
+		printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
+	}
+	else
+	{
+		//Create texture from surface pixels
+		newTexture = SDL_CreateTextureFromSurface(render, loadedSurface);
+		if (newTexture == NULL)
+		{
+			printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
+		}
 
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, loadImage->format->BytesPerPixel, loadImage->w, loadImage->h,0,GL_RGB,GL_UNSIGNED_BYTE, loadImage->pixels);
-		
+		//Get rid of old loaded surface
+		SDL_FreeSurface(loadedSurface);
+	}
+
+	return newTexture;
+}
+
+bool Game::DisplayMedia()
+{
+	//Apply the image stretched
+	SDL_Rect stretchRect;
+	stretchRect.x = 100;
+	stretchRect.y = 150;
+	
+
+
+	//Apply the image
+	SDL_BlitSurface(image, NULL, screen, &stretchRect);
+	//Update the surface
+	SDL_UpdateWindowSurface(window);
+	return true;
+}
+
+bool Game::Setup()
+{
+	bool success = true;
+	if (!Init(600, 900)) {
+		std::cout << "Failed to initiialize" << std::endl;
+		success = false;
 	}
 	else {
-		printf("Not Valid filePath");
+		if (!LoadMedia("Picture/Paddle.png")) {
+			std::cout << "Failed to initiialize" << std::endl;
+			success = false;
+		}
+		else {
+			//DisplayMedia();
+		}
 	}
-		SDL_FreeSurface(loadImage);
-		SDL_GL_DeleteContext(context);
-	return loadImage;
+	DrawBox();
+	
+	MakeViewPort();
+
+	SDL_RenderPresent(render);
+	/*
+	SDL_RenderClear(render);
+	SDL_RenderCopy(render,texture, NULL, NULL);
+	SDL_RenderPresent(render);*/
+
+	return success;
+	
 }
-/*
-void Game::Render(float delta)
+
+void Game::MakeViewPort()
 {
-	SDL_SetRenderDrawColor(rendrer, 0, 0, 0, 255);
-	SDL_RenderClear(rendrer);
+	SDL_Rect topViewPort;
+	topViewPort.x = 0;
+	topViewPort.y = 0;
+	topViewPort.w = SCREEN_WIDTH;
+	topViewPort.h = SCREEN_HEIGHT / 6;
+	SDL_RenderSetViewport(render, &topViewPort);
 
-	field->Render(delta);
-	ball->Render(delta);
+	SDL_RenderCopy(render, texture, NULL, NULL);
+}
 
-	SDL_RenderPresent(rendrer);
+void Game::DrawBox()
+{
+	SDL_SetRenderDrawColor(render, 0xFF, 0xFF, 0xFF, 0xFF);
+	SDL_RenderClear(render);
 
-	surface = IMG_Load("/Resource Files / Picture / paddleBounds.png");
-	texture = SDL_CreateTextureFromSurface(rendrer, surface);
-	SDL_FreeSurface(surface);
+	SDL_Rect fillrect = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
+	SDL_SetRenderDrawColor(render, 0xFF, 0x00, 0x00, 0xFF);
+	SDL_RenderFillRect(render, &fillrect);
 
-}*/
+	SDL_Rect outlineRect = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
+	SDL_SetRenderDrawColor(render, 0x00, 0xFF, 0x00, 0xFF);
+	SDL_RenderDrawRect(render, &outlineRect);
+
+	SDL_SetRenderDrawColor(render, 0x00, 0x00, 0xFF, 0xFF);
+	SDL_RenderDrawLine(render, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
+
+	SDL_SetRenderDrawColor(render, 0xFF, 0xFF, 0x00, 0xFF);
+
+	for (int i = 0; i < SCREEN_HEIGHT; i += 4) {
+		SDL_RenderDrawPoint(render, SCREEN_WIDTH / 2, i);
+	}
+}
+
 
